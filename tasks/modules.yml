@@ -1,0 +1,18 @@
+---
+
+- name: "Create modules dir zabbix-agent"
+  file: path={{ agent_loadmodulepath }}
+        owner=root
+        group=root
+        state=directory
+  become: yes
+  tags:
+    - config
+    - include
+
+- name: Copy modules
+  copy:
+    src: "modules/{{ item }}"
+    dest: "{{ agent_loadmodulepath }}/{{ item }}"
+  with_items:
+    - "{{ agent_loadmodule }}"

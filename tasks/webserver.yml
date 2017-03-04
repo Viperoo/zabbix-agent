@@ -1,0 +1,37 @@
+---
+
+- name: "Installing nginx check script"
+  copy: src=bin/nginx-check.sh
+        dest="{{ agent_scripts_bin }}/nginx-check.sh"
+        owner=zabbix
+        group=zabbix
+        mode=0755
+  become: yes
+
+- name: "Installing nginx check userparameter"
+  copy: src=zabbix_agentd.d/nginx.conf
+        dest="{{ agent_include }}/nginx.conf"
+        owner=zabbix
+        group=zabbix
+        mode=0755
+  become: yes
+
+- name: "Installing php scripts"
+  copy: src="bin/{{ item }}"
+        dest="{{ agent_scripts_bin }}/{{ item }}"
+        owner=zabbix
+        group=zabbix
+        mode=0755
+  become: yes
+  with_items:
+    - php-discovery.sh
+    - php-ping.sh
+    - php.sh
+
+- name: "Installing php userparameter"
+  copy: src=zabbix_agentd.d/php.conf
+        dest="{{ agent_include }}/php.conf"
+        owner=zabbix
+        group=zabbix
+        mode=0755
+  become: yes

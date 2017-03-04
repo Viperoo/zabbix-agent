@@ -1,0 +1,51 @@
+---
+
+- name: "Installing disk performance discover script"
+  copy: src=lld-disks.py
+        dest="{{ agent_scripts_bin }}/lld-disks.py"
+        owner=zabbix
+        group=zabbix
+        mode=0755
+  become: yes
+
+- name: "Installing disk performance userparameter file"
+  copy: src=userparameter_diskstats.conf
+        dest="{{ agent_include }}/userparameter_diskstats.conf"
+        owner=zabbix
+        group=zabbix
+        mode=0755
+  notify: restart zabbix-agent
+  become: yes
+
+- name: "Installing mysql parameter"
+  copy: src=userparamater_mysql.conf
+        dest="{{ agent_include }}/userparameter_mysql.conf"
+        owner=zabbix
+        group=zabbix
+        mode=0755
+  become: yes
+  when: mysql_zabbix_user is defined
+
+- name: Create zabbix my.cnf directory
+  file: path=/var/lib/zabbix/
+        owner=zabbix
+        group=zabbix
+        state=directory
+  when: mysql_zabbix_user is defined
+
+- name: "Generating zabbix my.cnf"
+  template: src=my.cnf.j2
+            dest=/var/lib/zabbix/.my.cnf
+            owner=zabbix
+            group=zabbix
+            mode=0600
+  become: yes
+  when: mysql_zabbix_user is defined
+
+- name: Create a zabbix database user
+  when: mysql_zabbix_user is defined
+  mysql_user:
+    name: "{{ mysql_zabbix_user }}"
+    password: "{{ mysql_zabbix_password }}"
+    priv: '*.*:SELECT,LOCK TABLES,SHOW VIEW,EVENT,TRIGGER'
+    state: present
